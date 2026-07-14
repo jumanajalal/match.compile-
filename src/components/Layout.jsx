@@ -11,9 +11,7 @@ export default function Layout({ children, activeTab, setActiveTab, profile, han
     { id: 'profile', label: 'Profile', icon: User, color: '#00B140' },
   ];
 
-  const initials = profile?.full_name
-    ? profile.full_name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
-    : '??';
+  const initials = profile?.full_name ? profile.full_name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() : '??';
 
   return (
     <div className="flex h-screen w-full bg-[#030304] text-gray-400 font-body overflow-hidden relative">
@@ -22,6 +20,7 @@ export default function Layout({ children, activeTab, setActiveTab, profile, han
         <div className="absolute top-1/3 -left-40 w-96 h-96 rounded-full blur-[120px] opacity-[0.07]" style={{ background: '#00E5FF' }} />
       </div>
 
+      {/* DESKTOP SIDEBAR */}
       <aside className="w-64 border-r border-gray-800/40 bg-[#060608]/80 backdrop-blur-xl flex-col justify-between hidden md:flex z-20 relative">
         <div className="p-6">
           <h1 className="font-display font-bold text-base uppercase tracking-widest text-white mb-1">
@@ -31,7 +30,6 @@ export default function Layout({ children, activeTab, setActiveTab, profile, han
             <span className="w-1.5 h-1.5 rounded-full bg-fifa-lime animate-pulse" />
             <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold">Live · Day 1 of 6</span>
           </div>
-
           <nav className="space-y-1.5">
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
@@ -47,30 +45,41 @@ export default function Layout({ children, activeTab, setActiveTab, profile, han
             })}
           </nav>
         </div>
-
         <div className="p-4 border-t border-gray-800/40">
           <button onClick={() => setActiveTab('profile')}
             className="w-full flex items-center gap-3 p-3 rounded-xl bg-[#0d0d10] border border-gray-800/60 hover:border-fifa-cyan/40 transition-colors mb-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-fifa-cyan to-fifa-purple flex items-center justify-center text-black font-display font-bold text-xs shrink-0">
-              {initials}
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-fifa-cyan to-fifa-purple flex items-center justify-center text-black font-display font-bold text-xs shrink-0 overflow-hidden">
+              {profile?.avatar_url ? <img src={profile.avatar_url} className="w-full h-full object-cover" /> : initials}
             </div>
             <div className="text-left overflow-hidden flex-1">
               <div className="text-xs font-bold text-white truncate">{profile?.full_name || 'Player'}</div>
               <div className="text-[9px] text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
-                <span>{profile?.department || '—'}</span>
-                <span>·</span>
-                <Flag nation={profile?.adopted_nation} className="w-4 h-3" />
+                <span>{profile?.department || '—'}</span><span>·</span><Flag nation={profile?.adopted_nation} className="w-4 h-3" />
               </div>
             </div>
           </button>
-          <button onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 text-[9px] uppercase font-bold tracking-widest text-gray-600 hover:text-fifa-red transition-colors py-2">
+          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 text-[9px] uppercase font-bold tracking-widest text-gray-600 hover:text-fifa-red transition-colors py-2">
             <LogOut size={12} /> Disconnect
           </button>
         </div>
       </aside>
 
-      <main className="flex-1 h-full overflow-y-auto p-6 lg:p-10 relative z-10">
+      {/* MOBILE BOTTOM NAV */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#060608]/95 backdrop-blur-xl border-t border-gray-800/60 flex justify-around py-2 px-1">
+        {navItems.map((item) => {
+          const isActive = activeTab === item.id;
+          return (
+            <button key={item.id} onClick={() => setActiveTab(item.id)}
+              className="flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg"
+              style={{ color: isActive ? item.color : '#6b7280' }}>
+              <item.icon size={18} />
+              <span className="text-[8px] font-bold uppercase tracking-widest">{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      <main className="flex-1 h-full overflow-y-auto p-6 lg:p-10 pb-24 md:pb-10 relative z-10">
         {children}
       </main>
     </div>

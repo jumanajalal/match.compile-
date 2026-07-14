@@ -1,27 +1,19 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Lock, Unlock, Code, CheckCircle2 } from 'lucide-react';
+import { ROUND_UNLOCK, isRoundUnlocked, unlockTimeLabel } from '../lib/roundSchedule';
 
-export default function Dashboard({ onOpenRound, onManageSquad }) {
-  // 1. Get the current time
-  const now = new Date();
-  
-  // 2. Set your exact kickoff time (Year, Month index (0-11), Day, Hour, Minute)
-  // Note: Months are 0-indexed in JS! 6 = July. 
-  // Below is set for July 14, 2026, at 18:00 (6:00 PM)
-  const kickoffTime = new Date(2026, 6, 14, 18, 0, 0); 
+const ROUND_META = {
+  1: { title: "Kickoff Trivia", tag: "🟢 Anyone can join", hex: "#E6332A" },
+  2: { title: "Prediction (SF2)", tag: "🟢 Anyone can join", hex: "#6B2B8E" },
+  3: { title: "Transfer Market", tag: "🟡 Some tech helps", hex: "#1E3A8A" },
+  4: { title: "VAR Check", tag: "🟢 Anyone can join", hex: "#00B140" },
+  5: { title: "Memes & Moments", tag: "🟢 Anyone can join", hex: "#00E5FF" },
+  6: { title: "Final Whistle", tag: "🔴 Build skills help", hex: "#C4D600" },
+};
 
-  // 3. If we have passed kickoff time, set day to 1. Otherwise, keep it at 0.
-  const currentDay = now >= kickoffTime ? 1 : 0;
-
-  const rounds = [
-    { day: 1, title: "Kickoff Trivia", tag: "🟢 Anyone can join", hex: "#E6332A" },
-    { day: 2, title: "Prediction (SF2)", tag: "🟢 Anyone can join", hex: "#6B2B8E" },
-    { day: 3, title: "Transfer Market", tag: "🟡 Some tech helps", hex: "#1E3A8A" },
-    { day: 4, title: "VAR Check", tag: "🟢 Anyone can join", hex: "#00B140" },
-    { day: 5, title: "Memes & Moments", tag: "🟢 Anyone can join", hex: "#00E5FF" },
-    { day: 6, title: "Final Whistle", tag: "🔴 Build skills help", hex: "#C4D600" },
-  ];
+export default function Dashboard({ onOpenRound, onManageSquad, completedRounds = [] }) {
+  const rounds = Object.entries(ROUND_META).map(([day, meta]) => ({ day: Number(day), ...meta }));
 
   return (
     <div className="max-w-6xl mx-auto pb-12">
@@ -48,36 +40,38 @@ export default function Dashboard({ onOpenRound, onManageSquad }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
         {rounds.map((round) => {
-          const isUnlocked = round.day <= currentDay;
-          const isActive = round.day === currentDay;
+          const unlocked = isRoundUnlocked(round.day);
+          const isComplete = completedRounds.includes(round.day);
           return (
             <motion.div
               key={round.day}
-              onClick={() => isUnlocked && onOpenRound && onOpenRound(round.day)}
-              whileHover={isUnlocked ? { y: -4 } : {}}
+              onClick={() => unlocked && onOpenRound && onOpenRound(round.day)}
+              whileHover={unlocked ? { y: -4 } : {}}
               style={{
-                borderColor: isUnlocked ? `${round.hex}60` : '#1a1a1f',
-                background: isUnlocked
-                  ? `linear-gradient(135deg, ${round.hex}14 0%, #08080a 75%)`
-                  : '#08080a',
-                boxShadow: isActive ? `0 0 40px -12px ${round.hex}80` : 'none',
+                borderColor: unlocked ? `${round.hex}60` : '#1a1a1f',
+                background: unlocked ? `linear-gradient(135deg, ${round.hex}14 0%, #08080a 75%)` : '#08080a',
+                boxShadow: unlocked && !isComplete ? `0 0 40px -12px ${round.hex}80` : 'none',
               }}
               className={`relative rounded-2xl p-6 h-36 flex flex-col justify-between cursor-pointer transition-all duration-300 border
-                ${!isUnlocked && 'opacity-40 grayscale cursor-not-allowed pointer-events-none'}`}
+                ${!unlocked && 'opacity-40 grayscale cursor-not-allowed pointer-events-none'}`}
             >
               <div className="flex justify-between items-start">
-                <span className="font-display text-3xl leading-none" style={{ color: isUnlocked ? round.hex : '#374151' }}>
+                <span className="font-display text-3xl leading-none" style={{ color: unlocked ? round.hex : '#374151' }}>
                   0{round.day}
                 </span>
-                {isUnlocked ? <Unlock size={14} style={{ color: round.hex }} /> : <Lock size={14} className="text-gray-700" />}
+                {isComplete ? <CheckCircle2 size={16} className="text-fifa-lime" />
+                  : unlocked ? <Unlock size={14} style={{ color: round.hex }} />
+                  : <Lock size={14} className="text-gray-700" />}
               </div>
               <div>
-                <h3 className={`font-display text-base uppercase tracking-wide leading-tight mb-1 ${isUnlocked ? 'text-white' : 'text-gray-600'}`}>
+                <h3 className={`font-display text-base uppercase tracking-wide leading-tight mb-1 ${unlocked ? 'text-white' : 'text-gray-600'}`}>
                   {round.title}
                 </h3>
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-gray-500 font-medium">{isUnlocked ? round.tag : `Unlocks Day ${round.day}`}</span>
-                  {isActive && (
+                  <span className="text-[9px] text-gray-500 font-medium">
+                    {isComplete ? '✓ Completed' : unlocked ? round.tag : `Unlocks ${unlockTimeLabel(round.day)}`}
+                  </span>
+                  {unlocked && !isComplete && (
                     <span className="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest animate-pulse"
                       style={{ color: round.hex, backgroundColor: `${round.hex}15` }}>Active</span>
                   )}

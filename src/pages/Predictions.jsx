@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Flag from '../components/Flag';
 
-const MATCH = { round: 'sf1_prediction', teamA: 'Argentina', teamB: 'Switzerland' };
+const MATCH = { round: 'sf1_prediction', teamA: 'Spain', teamB: 'France' };
 
 export default function Predictions({ profile }) {
   const [scoreA, setScoreA] = useState(0);

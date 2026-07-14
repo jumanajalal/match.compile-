@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Scale, Shield, Calendar, Code, Flame } from 'lucide-react';
+import { isRoundUnlocked, unlockTimeLabel } from '../lib/roundSchedule';
 
 const TIMELINE = [
   { date: "July 14", tag: "SF1", title: "Kickoff Trivia", hex: "#E6332A" },
@@ -14,8 +15,6 @@ const TIMELINE = [
 export default function Home({ onPlayToday, onViewBuildSpecs }) {
   return (
     <div className="max-w-6xl mx-auto pb-12">
-
-      {/* HERO — this is the hook, not the rulebook */}
       <motion.div
         initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
         className="relative mb-10 rounded-3xl overflow-hidden border border-gray-800/60 p-8 md:p-12 bg-gradient-to-br from-[#0f0a14] via-[#0a0a0c] to-[#08080a]"
@@ -36,13 +35,19 @@ export default function Home({ onPlayToday, onViewBuildSpecs }) {
 
         <p className="relative text-sm md:text-base text-gray-400 max-w-xl mb-6 leading-relaxed">
           No football knowledge needed. No coding background needed. Just show up, rack up points,
-          and see if CSE, ECE, EEE, MECH, or CIVIL walks away with the crown when the Final whistle blows.
+          and see if CSE, ECE, EEE, MECH, FOOD_TECH, AGRI, MBA, MCA, CS, AI or CIVIL walks away with the crown when the Final whistle blows.
         </p>
 
-        <div className="relative flex flex-wrap gap-3">
-          <button onClick={onPlayToday} className="bg-white text-black font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-fifa-cyan transition-colors">
-    Play Today's Round →
-  </button>
+        <div className="relative flex flex-wrap items-center gap-3">
+          {isRoundUnlocked(1) ? (
+            <button onClick={onPlayToday} className="bg-white text-black font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-fifa-cyan transition-colors">
+              Play Today's Round →
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 px-6 py-3 rounded-xl border border-gray-800 text-gray-500 text-xs font-bold uppercase tracking-widest">
+              🔒 Unlocks at {unlockTimeLabel(1)}
+            </div>
+          )}
           <div className="flex items-center gap-2 px-4 py-3 text-xs text-gray-500 font-bold uppercase tracking-widest">
             <Flame size={14} className="text-fifa-red" /> Kickoff Trivia closes tonight
           </div>
@@ -61,7 +66,7 @@ export default function Home({ onPlayToday, onViewBuildSpecs }) {
               {[
                 { n: '01', b: 'Everyone has a lane', d: 'Zero football knowledge? Zero coding skills? There\'s a path to points either way — every round has an easy layer.' },
                 { n: '02', b: 'The Build Round never stops', d: 'Open Day 1 to Day 6, running quietly in the background. Ship an ML model or a no-code flowchart — both count, code scores higher.' },
-                { n: '03', b: 'Your points aren\'t just yours', d: 'Every point feeds your department\'s total. CSE, ECE, EEE, MECH, CIVIL — one squad takes the crown.' },
+                { n: '03', b: 'Your points aren\'t just yours', d: 'Every point feeds your department\'s total. One squad takes the crown.' },
               ].map(r => (
                 <li key={r.n} className="flex gap-4">
                   <span className="font-display font-black text-2xl text-fifa-cyan/30 leading-none">{r.n}</span>
@@ -115,8 +120,8 @@ export default function Home({ onPlayToday, onViewBuildSpecs }) {
             </h2>
             <p className="text-xs text-gray-400 mb-4">Six days to ship something. Start whenever, submit by the Final.</p>
             <button onClick={onViewBuildSpecs} className="w-full bg-white text-black text-[10px] font-bold tracking-widest uppercase py-3 rounded-lg hover:bg-fifa-cyan transition-colors">
-    View Build Specs
-  </button>
+              View Build Specs
+            </button>
           </motion.div>
         </div>
       </div>
