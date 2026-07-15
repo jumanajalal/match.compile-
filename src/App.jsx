@@ -12,7 +12,7 @@ import Login from './pages/Login';
 import ManageSquadModal from './components/ManageSquadModal';
 import BuildSpecsModal from './components/BuildSpecsModal';
 
-const ROUND_NAME_MAP = { 1: 'kickoff_trivia' }; // extend as more rounds go live
+const ROUND_NAME_MAP = { 1: 'kickoff_trivia', 2: 'puzzle_break' }; // extend as more rounds go live
 
 export default function App() {
   const [session, setSession] = useState(null);

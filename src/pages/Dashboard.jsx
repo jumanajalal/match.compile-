@@ -1,18 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Unlock, Code, CheckCircle2 } from 'lucide-react';
-import { ROUND_UNLOCK, isRoundUnlocked, unlockTimeLabel } from '../lib/roundSchedule';
+import { Lock, Unlock, Code, CheckCircle2, XCircle } from 'lucide-react';
+import { isRoundUnlocked, isRoundClosed, unlockTimeLabel, ROUND_UNLOCK } from '../lib/roundSchedule';
 
 const ROUND_META = {
   1: { title: "Kickoff Trivia", tag: "🟢 Anyone can join", hex: "#E6332A" },
-  2: { title: "Prediction (SF2)", tag: "🟢 Anyone can join", hex: "#6B2B8E" },
-  3: { title: "Transfer Market", tag: "🟡 Some tech helps", hex: "#1E3A8A" },
+  2: { title: "Puzzle Break", tag: "🟢 Anyone can join", hex: "#1E3A8A" },
+  3: { title: "Transfer Market", tag: "🟡 Some tech helps", hex: "#6B2B8E" },
   4: { title: "VAR Check", tag: "🟢 Anyone can join", hex: "#00B140" },
   5: { title: "Memes & Moments", tag: "🟢 Anyone can join", hex: "#00E5FF" },
   6: { title: "Final Whistle", tag: "🔴 Build skills help", hex: "#C4D600" },
 };
 
+function closeTimeLabel(day) {
+  const cfg = ROUND_UNLOCK[day];
+  if (!cfg?.close) return null;
+  return new Date(cfg.close).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+}
+
 export default function Dashboard({ onOpenRound, onManageSquad, completedRounds = [] }) {
+  const [, forceTick] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => forceTick(t => t + 1), 30000); // re-check unlock/close times every 30s
+    return () => clearInterval(id);
+  }, []);
+
   const rounds = Object.entries(ROUND_META).map(([day, meta]) => ({ day: Number(day), ...meta }));
 
   return (
@@ -41,41 +54,48 @@ export default function Dashboard({ onOpenRound, onManageSquad, completedRounds 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
         {rounds.map((round) => {
           const unlocked = isRoundUnlocked(round.day);
+          const closed = isRoundClosed(round.day);
           const isComplete = completedRounds.includes(round.day);
+          const clickable = unlocked && !closed;
+
           return (
             <motion.div
               key={round.day}
-              onClick={() => unlocked && onOpenRound && onOpenRound(round.day)}
-              whileHover={unlocked ? { y: -4 } : {}}
+              onClick={() => clickable && onOpenRound && onOpenRound(round.day)}
+              whileHover={clickable ? { y: -4 } : {}}
               style={{
-                borderColor: unlocked ? `${round.hex}60` : '#1a1a1f',
-                background: unlocked ? `linear-gradient(135deg, ${round.hex}14 0%, #08080a 75%)` : '#08080a',
-                boxShadow: unlocked && !isComplete ? `0 0 40px -12px ${round.hex}80` : 'none',
+                borderColor: clickable ? `${round.hex}60` : '#1a1a1f',
+                background: clickable ? `linear-gradient(135deg, ${round.hex}14 0%, #08080a 75%)` : '#08080a',
+                boxShadow: clickable && !isComplete ? `0 0 40px -12px ${round.hex}80` : 'none',
               }}
               className={`relative rounded-2xl p-6 h-36 flex flex-col justify-between cursor-pointer transition-all duration-300 border
-                ${!unlocked && 'opacity-40 grayscale cursor-not-allowed pointer-events-none'}`}
+                ${!clickable && 'opacity-40 grayscale cursor-not-allowed pointer-events-none'}`}
             >
               <div className="flex justify-between items-start">
-                <span className="font-display text-3xl leading-none" style={{ color: unlocked ? round.hex : '#374151' }}>
+                <span className="font-display text-3xl leading-none" style={{ color: clickable ? round.hex : '#374151' }}>
                   0{round.day}
                 </span>
-                {isComplete ? <CheckCircle2 size={16} className="text-fifa-lime" />
+                {closed ? <XCircle size={14} className="text-gray-700" />
+                  : isComplete ? <CheckCircle2 size={16} className="text-fifa-lime" />
                   : unlocked ? <Unlock size={14} style={{ color: round.hex }} />
                   : <Lock size={14} className="text-gray-700" />}
               </div>
               <div>
-                <h3 className={`font-display text-base uppercase tracking-wide leading-tight mb-1 ${unlocked ? 'text-white' : 'text-gray-600'}`}>
+                <h3 className={`font-display text-base uppercase tracking-wide leading-tight mb-1 ${clickable ? 'text-white' : 'text-gray-600'}`}>
                   {round.title}
                 </h3>
                 <div className="flex justify-between items-center">
                   <span className="text-[9px] text-gray-500 font-medium">
-                    {isComplete ? '✓ Completed' : unlocked ? round.tag : `Unlocks ${unlockTimeLabel(round.day)}`}
+                    {closed ? '⏹ Round closed' : isComplete ? '✓ Completed' : unlocked ? round.tag : `Unlocks ${unlockTimeLabel(round.day)}`}
                   </span>
-                  {unlocked && !isComplete && (
+                  {clickable && !isComplete && (
                     <span className="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest animate-pulse"
                       style={{ color: round.hex, backgroundColor: `${round.hex}15` }}>Active</span>
                   )}
                 </div>
+                {clickable && closeTimeLabel(round.day) && (
+                  <p className="text-[8px] text-gray-600 mt-1.5">Closes {closeTimeLabel(round.day)} today</p>
+                )}
               </div>
             </motion.div>
           );

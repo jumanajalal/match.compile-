@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { buildQuizForPlayer } from './questionBank';
+import { isRoundClosed } from '../lib/roundSchedule';
 
 export default function TriviaRound({ profile, onComplete }) {
   const [attempt, setAttempt] = useState(null);
@@ -8,44 +9,47 @@ export default function TriviaRound({ profile, onComplete }) {
   const [elapsed, setElapsed] = useState(0);
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState(null);
+  const [closed, setClosed] = useState(false);
 
-  // TriviaRound.jsx — replace the init() function inside useEffect
-useEffect(() => {
-  async function init() {
-    let { data: existing } = await supabase
-      .from('quiz_attempts').select('*')
-      .eq('participant_id', profile.id).eq('round_name', 'kickoff_trivia').maybeSingle();
+  useEffect(() => {
+    async function init() {
+      let { data: existing } = await supabase
+        .from('quiz_attempts').select('*')
+        .eq('participant_id', profile.id).eq('round_name', 'kickoff_trivia').maybeSingle();
 
-    if (!existing) {
-      const questionSet = buildQuizForPlayer(profile.adopted_nation);
-      const { data: created, error } = await supabase
-        .from('quiz_attempts')
-        .insert([{ participant_id: profile.id, round_name: 'kickoff_trivia', question_set: questionSet }])
-        .select().single();
+      if (!existing) {
+        if (isRoundClosed(1)) {
+          setClosed(true);
+          setLoading(false);
+          return;
+        }
+        const questionSet = buildQuizForPlayer(profile.adopted_nation);
+        const { data: created, error } = await supabase
+          .from('quiz_attempts')
+          .insert([{ participant_id: profile.id, round_name: 'kickoff_trivia', question_set: questionSet }])
+          .select().single();
 
-      if (error) {
-        // Someone/something already created this row (e.g. StrictMode double-call) — fetch it instead of crashing
-        const { data: retry } = await supabase
-          .from('quiz_attempts').select('*')
-          .eq('participant_id', profile.id).eq('round_name', 'kickoff_trivia').maybeSingle();
-        existing = retry;
-      } else {
-        existing = created;
+        if (error) {
+          const { data: retry } = await supabase
+            .from('quiz_attempts').select('*')
+            .eq('participant_id', profile.id).eq('round_name', 'kickoff_trivia').maybeSingle();
+          existing = retry;
+        } else {
+          existing = created;
+        }
       }
-    }
 
-    setAttempt(existing);
-    if (existing?.submitted_at) {
-      setResult({ score: existing.score_value, duration: existing.duration_seconds });
-    } else if (existing) {
-      setAnswers(Array(existing.question_set.length).fill(null));
+      setAttempt(existing);
+      if (existing?.submitted_at) {
+        setResult({ score: existing.score_value, duration: existing.duration_seconds });
+      } else if (existing) {
+        setAnswers(Array(existing.question_set.length).fill(null));
+      }
+      setLoading(false);
     }
-    setLoading(false);
-  }
-  if (profile?.id) init();
-}, [profile]);
+    if (profile?.id) init();
+  }, [profile]);
 
-  // live timer, ticks from the DB-recorded start time, not local state — can't be reset by refresh
   useEffect(() => {
     if (!attempt || attempt.submitted_at) return;
     const start = new Date(attempt.started_at).getTime();
@@ -67,13 +71,16 @@ useEffect(() => {
       score_value: points,
     }).eq('id', attempt.id);
 
-    await supabase.from('scores').insert([{
-      participant_id: profile.id,
-      team_id: profile.team_id || null,
-      round_name: 'kickoff_trivia',
-      score_value: points,
-      duration_seconds: duration,
-    }]);
+    await supabase.from('scores').upsert(
+      [{
+        participant_id: profile.id,
+        team_id: profile.team_id || null,
+        round_name: 'kickoff_trivia',
+        score_value: points,
+        duration_seconds: duration,
+      }],
+      { onConflict: 'participant_id,round_name', ignoreDuplicates: true }
+    );
 
     setResult({ score: points, duration });
     onComplete && onComplete();
@@ -82,6 +89,16 @@ useEffect(() => {
   const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
   if (loading) return <div className="max-w-2xl mx-auto text-gray-500 text-sm">Loading round...</div>;
+
+  if (closed) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-16">
+        <div className="text-5xl mb-4">🔒</div>
+        <h2 className="font-display font-black text-2xl uppercase text-white mb-2">Round Closed</h2>
+        <p className="text-gray-400 text-sm">Kickoff Trivia has ended — you didn't get a submission in this time.</p>
+      </div>
+    );
+  }
 
   if (result) {
     return (

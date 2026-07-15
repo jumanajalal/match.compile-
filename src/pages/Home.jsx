@@ -1,18 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Scale, Shield, Calendar, Code, Flame } from 'lucide-react';
-import { isRoundUnlocked, unlockTimeLabel } from '../lib/roundSchedule';
+import { isRoundUnlocked, isRoundClosed, unlockTimeLabel } from '../lib/roundSchedule';
 
 const TIMELINE = [
   { date: "July 14", tag: "SF1", title: "Kickoff Trivia", hex: "#E6332A" },
-  { date: "July 15", tag: "SF2", title: "Prediction Focus", hex: "#6B2B8E" },
-  { date: "July 16", tag: "Gap Day", title: "Transfer Market Algo", hex: "#1E3A8A" },
+  { date: "July 15", tag: "SF2", title: "Puzzle Break", hex: "#1E3A8A" },
+  { date: "July 16", tag: "Gap Day", title: "Transfer Market Algo", hex: "#6B2B8E" },
   { date: "July 17", tag: "Gap Day", title: "VAR Logic Check", hex: "#00B140" },
   { date: "July 18", tag: "3rd Place", title: "Memes & Moments", hex: "#00E5FF" },
   { date: "July 19", tag: "Final", title: "Final Whistle + Build Drop", hex: "#C4D600" },
 ];
 
 export default function Home({ onPlayToday, onViewBuildSpecs }) {
+  const [, forceTick] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => forceTick(t => t + 1), 30000); // re-check unlock time every 30s
+    return () => clearInterval(id);
+  }, []);
+
+  const round1Unlocked = isRoundUnlocked(1);
+  const round1Closed = isRoundClosed(1);
+
   return (
     <div className="max-w-6xl mx-auto pb-12">
       <motion.div
@@ -39,7 +49,11 @@ export default function Home({ onPlayToday, onViewBuildSpecs }) {
         </p>
 
         <div className="relative flex flex-wrap items-center gap-3">
-          {isRoundUnlocked(1) ? (
+          {round1Closed ? (
+            <div className="flex items-center gap-2 px-6 py-3 rounded-xl border border-gray-800 text-gray-600 text-xs font-bold uppercase tracking-widest">
+              ⏹ Kickoff Trivia has closed
+            </div>
+          ) : round1Unlocked ? (
             <button onClick={onPlayToday} className="bg-white text-black font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-fifa-cyan transition-colors">
               Play Today's Round →
             </button>
@@ -48,9 +62,11 @@ export default function Home({ onPlayToday, onViewBuildSpecs }) {
               🔒 Unlocks at {unlockTimeLabel(1)}
             </div>
           )}
-          <div className="flex items-center gap-2 px-4 py-3 text-xs text-gray-500 font-bold uppercase tracking-widest">
-            <Flame size={14} className="text-fifa-red" /> Kickoff Trivia closes tonight
-          </div>
+          {round1Unlocked && !round1Closed && (
+            <div className="flex items-center gap-2 px-4 py-3 text-xs text-gray-500 font-bold uppercase tracking-widest">
+              <Flame size={14} className="text-fifa-red" /> Kickoff Trivia closes tonight
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -88,7 +104,7 @@ export default function Home({ onPlayToday, onViewBuildSpecs }) {
             </p>
             <div className="bg-black/40 border border-fifa-purple/30 rounded-xl p-4 text-xs text-gray-300">
               <span className="text-fifa-purple font-bold uppercase tracking-wide">Right now → </span>
-              Your nation is still alive. Check back after tonight's match.
+              Spain and Argentina are through to the Final. Check the Leaderboard for your nation's multiplier.
             </div>
           </motion.div>
         </div>
