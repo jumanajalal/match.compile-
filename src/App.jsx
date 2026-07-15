@@ -3,6 +3,7 @@ import Predictions from './pages/Predictions';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
 import TriviaRound from './pages/TriviaRound';
+import PuzzleRound from './pages/PuzzleRound';
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabaseClient';
 import { isRoundUnlocked, unlockTimeLabel } from './lib/roundSchedule';
@@ -12,7 +13,7 @@ import Login from './pages/Login';
 import ManageSquadModal from './components/ManageSquadModal';
 import BuildSpecsModal from './components/BuildSpecsModal';
 
-const ROUND_NAME_MAP = { 1: 'kickoff_trivia', 2: 'puzzle_break' }; // extend as more rounds go live
+const ROUND_NAME_MAP = { 1: 'kickoff_trivia', 2: 'puzzle_break' };
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -46,11 +47,18 @@ export default function App() {
 
   if (!session) return <Login />;
 
+  const handleOpenRound = (day) => {
+    if (day === 1) setActiveTab('trivia');
+    if (day === 2) setActiveTab('puzzle');
+    // add more mappings here as Rounds 3-6 go live
+  };
+
   return (
     <>
       <Layout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} handleLogout={() => supabase.auth.signOut()}>
         {activeTab === 'home' && <Home onPlayToday={() => setActiveTab('trivia')} onViewBuildSpecs={() => setShowBuildSpecs(true)} />}
-        {activeTab === 'arena' && <Dashboard onOpenRound={(day) => day === 1 && setActiveTab('trivia')} onManageSquad={() => setShowManageSquad(true)} completedRounds={completedRounds} />}
+        {activeTab === 'arena' && <Dashboard onOpenRound={handleOpenRound} onManageSquad={() => setShowManageSquad(true)} completedRounds={completedRounds} />}
+
         {activeTab === 'trivia' && (
           isRoundUnlocked(1) ? (
             <TriviaRound profile={profile} onComplete={refreshCompletedRounds} />
@@ -62,9 +70,22 @@ export default function App() {
             </div>
           )
         )}
+
+        {activeTab === 'puzzle' && (
+          isRoundUnlocked(2) ? (
+            <PuzzleRound profile={profile} onComplete={refreshCompletedRounds} />
+          ) : (
+            <div className="max-w-2xl mx-auto text-center py-20">
+              <div className="text-5xl mb-4">🔒</div>
+              <h2 className="font-display font-black text-2xl uppercase text-white mb-2">Not Yet</h2>
+              <p className="text-gray-400 text-sm">Puzzle Break unlocks at {unlockTimeLabel(2)} today.</p>
+            </div>
+          )
+        )}
+
         {activeTab === 'predictions' && <Predictions profile={profile} />}
         {activeTab === 'leaderboard' && <Leaderboard />}
-        {activeTab === 'profile' && <Profile profile={profile} onUpdated={refreshProfile} />}
+        {activeTab === 'profile' && <Profile profile={profile} />}
       </Layout>
 
       {showManageSquad && <ManageSquadModal profile={profile} onClose={() => setShowManageSquad(false)} onUpdated={() => { refreshProfile(); setShowManageSquad(false); }} />}

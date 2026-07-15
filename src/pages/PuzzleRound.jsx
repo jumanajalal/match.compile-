@@ -92,24 +92,39 @@ export default function PuzzleRound({ profile, onComplete }) {
     const points = correct * POINTS_PER_CORRECT;
     const duration = Math.floor((Date.now() - new Date(attempt.started_at).getTime()) / 1000);
 
-    await supabase.from('quiz_attempts').update({
+    // 1. Update the attempt record and check for errors
+    const { error: attemptError } = await supabase.from('quiz_attempts').update({
       submitted_at: new Date().toISOString(),
       duration_seconds: duration,
       score_value: points,
       tab_switches: tabSwitches.current,
     }).eq('id', attempt.id);
 
-    await supabase.from('scores').upsert(
-      [{
+    if (attemptError) {
+      console.error("Attempt Update Error:", attemptError);
+      alert("Failed to save attempt: " + attemptError.message);
+      return; // Stop execution, don't show the success screen
+    }
+
+    // 2. Save to the scores table and check for errors
+    const { error: scoreError } = await supabase.from('scores').upsert(
+      {
         participant_id: profile.id,
         team_id: profile.team_id || null,
         round_name: 'puzzle_break',
         score_value: points,
         duration_seconds: duration,
-      }],
-      { onConflict: 'participant_id,round_name', ignoreDuplicates: true }
+      },
+      { onConflict: 'participant_id,round_name' } // I removed ignoreDuplicates: true
     );
 
+    if (scoreError) {
+      console.error("Score Save Error:", scoreError);
+      alert("Failed to save to leaderboard: " + scoreError.message);
+      return; // Stop execution, don't show the success screen
+    }
+
+    // 3. Only show success if both database calls worked
     setResult({ score: points, duration });
     onComplete && onComplete();
   };
