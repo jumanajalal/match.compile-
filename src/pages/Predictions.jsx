@@ -157,7 +157,6 @@ export default function Predictions({ profile }) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      // Change these lines inside the return block
 <p className="text-[10px] font-bold tracking-[0.3em] text-fifa-purple uppercase mb-2">
   Third Place Playoff // Prediction
 </p>
