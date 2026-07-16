@@ -12,8 +12,9 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import ManageSquadModal from './components/ManageSquadModal';
 import BuildSpecsModal from './components/BuildSpecsModal';
+import TransferMarket from './pages/TransferMarket';
 
-const ROUND_NAME_MAP = { 1: 'kickoff_trivia', 2: 'puzzle_break' };
+const ROUND_NAME_MAP = { 1: 'kickoff_trivia', 2: 'puzzle_break', 3: 'transfer_market' };
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -50,6 +51,7 @@ export default function App() {
   const handleOpenRound = (day) => {
     if (day === 1) setActiveTab('trivia');
     if (day === 2) setActiveTab('puzzle');
+    if (day === 3) setActiveTab('transfer_market');
     // add more mappings here as Rounds 3-6 go live
   };
 
@@ -79,6 +81,18 @@ export default function App() {
               <div className="text-5xl mb-4">🔒</div>
               <h2 className="font-display font-black text-2xl uppercase text-white mb-2">Not Yet</h2>
               <p className="text-gray-400 text-sm">Puzzle Break unlocks at {unlockTimeLabel(2)} today.</p>
+            </div>
+          )
+        )}
+
+        {activeTab === 'transfer_market' && (
+          isRoundUnlocked(3) ? (
+            <TransferMarket profile={profile} onComplete={refreshCompletedRounds} />
+          ) : (
+            <div className="max-w-2xl mx-auto text-center py-20">
+              <div className="text-5xl mb-4">🔒</div>
+              <h2 className="font-display font-black text-2xl uppercase text-white mb-2">Not Yet</h2>
+              <p className="text-gray-400 text-sm">Transfer Market unlocks at {unlockTimeLabel(3)} today.</p>
             </div>
           )
         )}

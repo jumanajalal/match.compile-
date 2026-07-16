@@ -2,17 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Flag from '../components/Flag';
 
-const MATCH = { round: 'sf2_prediction', teamA: 'England', teamB: 'Argentina' };
+const MATCH = { round: '3rd_place_prediction', teamA: 'England', teamB: 'France' };
 
 // Add a new entry here every time a match wraps — this drives the "Past Matches" section below.
+// Add the previous match here so it appears in the "Past Matches" section
 const PAST_MATCHES = [
   {
     round: 'sf1_prediction',
     date: 'July 14',
     teamA: 'Spain',
-    teamB: 'France',
+    teamB: 'France', // Example actual teams
     actualScoreA: 2,
     actualScoreB: 0,
+  },
+  {
+    round: 'sf2_prediction',
+    date: 'July 15',
+    teamA: 'England',
+    teamB: 'Argentina', 
+    actualScoreA: 1,
+    actualScoreB: 2,
   },
 ];
 
@@ -148,8 +157,13 @@ export default function Predictions({ profile }) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <p className="text-[10px] font-bold tracking-[0.3em] text-fifa-purple uppercase mb-2">Round 02 // Prediction</p>
-      <h1 className="font-display font-black text-3xl uppercase tracking-wide text-white mb-8">SF2 Match Call</h1>
+      // Change these lines inside the return block
+<p className="text-[10px] font-bold tracking-[0.3em] text-fifa-purple uppercase mb-2">
+  Third Place Playoff // Prediction
+</p>
+<h1 className="font-display font-black text-3xl uppercase tracking-wide text-white mb-8">
+  3rd Place Match Call
+</h1>
 
       <div className="bg-gradient-to-br from-[#0d0d10] to-[#08080a] border border-fifa-purple/20 rounded-2xl p-8 mb-8 relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full blur-3xl opacity-10" style={{ background: '#6B2B8E' }} />
