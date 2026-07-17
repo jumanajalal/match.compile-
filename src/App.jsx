@@ -13,8 +13,9 @@ import Login from './pages/Login';
 import ManageSquadModal from './components/ManageSquadModal';
 import BuildSpecsModal from './components/BuildSpecsModal';
 import TransferMarket from './pages/TransferMarket';
+import VARRound from './pages/VARRound';
 
-const ROUND_NAME_MAP = { 1: 'kickoff_trivia', 2: 'puzzle_break', 3: 'transfer_market' };
+const ROUND_NAME_MAP = { 1: 'kickoff_trivia', 2: 'puzzle_break', 3: 'transfer_market',  4: 'var_check' };
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -52,6 +53,7 @@ export default function App() {
     if (day === 1) setActiveTab('trivia');
     if (day === 2) setActiveTab('puzzle');
     if (day === 3) setActiveTab('transfer_market');
+    if (day === 4) setActiveTab('var');
     // add more mappings here as Rounds 3-6 go live
   };
 
@@ -96,6 +98,18 @@ export default function App() {
             </div>
           )
         )}
+
+        {activeTab === 'var' && (
+  isRoundUnlocked(4) ? (
+    <VARRound profile={profile} onComplete={refreshCompletedRounds} />
+  ) : (
+    <div className="max-w-2xl mx-auto text-center py-20">
+      <div className="text-5xl mb-4">🔒</div>
+      <h2 className="font-display font-black text-2xl uppercase text-white mb-2">Not Yet</h2>
+      <p className="text-gray-400 text-sm">VAR Check unlocks at {unlockTimeLabel(4)} today.</p>
+    </div>
+  )
+)}
 
         {activeTab === 'predictions' && <Predictions profile={profile} />}
         {activeTab === 'leaderboard' && <Leaderboard />}

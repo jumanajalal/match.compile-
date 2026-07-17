@@ -10,6 +10,8 @@ export default function Leaderboard() {
   const [activeTab, setActiveTab] = useState('team');
   const [rows, setRows] = useState({ individual: [], team: [], department: [], nation: [] });
   const [loading, setLoading] = useState(true);
+  const [chiefRef, setChiefRef] = useState(null);
+  const [bestTactician, setBestTactician] = useState(null);
 
   const tabs = [
     { id: 'individual', label: 'Players', icon: User },
@@ -41,7 +43,24 @@ export default function Leaderboard() {
         .select('adopted_nation, total_nation_score')
         .order('total_nation_score', { ascending: false });
 
-      // group individual scores client-side since it's raw rows, not a view
+      const { data: varTop } = await supabase
+        .from('scores')
+        .select('participant_id, score_value, participants(full_name)')
+        .eq('round_name', 'var_check')
+        .order('score_value', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setChiefRef(varTop?.participants?.full_name || null);
+
+      const { data: tacticianTop } = await supabase
+        .from('scores')
+        .select('participant_id, score_value, participants(full_name)')
+        .eq('round_name', 'transfer_market')
+        .order('score_value', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setBestTactician(tacticianTop?.participants?.full_name || null);
+
       const byPerson = {};
       (individuals || []).forEach(r => {
         const name = r.participants?.full_name || 'Unknown';
@@ -61,7 +80,6 @@ export default function Leaderboard() {
     }
     fetchLeaderboards();
 
-    // realtime — refetch whenever a score row changes
     const channel = supabase
       .channel('scores-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'scores' }, fetchLeaderboards)
@@ -73,7 +91,26 @@ export default function Leaderboard() {
   return (
     <div className="max-w-4xl mx-auto">
       <p className="text-[10px] font-bold tracking-[0.3em] text-fifa-lime uppercase mb-2">Live Standings</p>
-      <h1 className="font-display font-black text-4xl uppercase tracking-wide text-white mb-8">Rankings</h1>
+      <h1 className="font-display font-black text-4xl uppercase tracking-wide text-white mb-6">Rankings</h1>
+
+      {(chiefRef || bestTactician) && (
+        <div className="flex flex-wrap gap-3 mb-6">
+          {chiefRef && (
+            <div className="flex items-center gap-2 bg-fifa-green/10 border border-fifa-green/30 rounded-full px-4 py-2">
+              <span className="text-sm">📺</span>
+              <span className="text-[10px] text-gray-400 uppercase tracking-widest">Chief VAR:</span>
+              <span className="text-[10px] text-fifa-green font-bold uppercase tracking-widest">{chiefRef}</span>
+            </div>
+          )}
+          {bestTactician && (
+            <div className="flex items-center gap-2 bg-fifa-blue/10 border border-fifa-blue/30 rounded-full px-4 py-2">
+              <span className="text-sm">🧠</span>
+              <span className="text-[10px] text-gray-400 uppercase tracking-widest">Best Tactician:</span>
+              <span className="text-[10px] text-fifa-blue font-bold uppercase tracking-widest">{bestTactician}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="flex gap-2 mb-8 bg-[#0a0a0c] p-1.5 rounded-xl border border-gray-800 w-fit flex-wrap">
         {tabs.map((tab) => (
@@ -107,9 +144,15 @@ export default function Leaderboard() {
                   <td className="p-4 font-bold" style={{ color: r.rank <= 3 ? '#C4D600' : '#6b7280' }}>
                     {medal[r.rank] || `0${r.rank}`}
                   </td>
-                  <td className="p-4 font-medium text-white flex items-center gap-2">
+                  <td className="p-4 font-medium text-white flex items-center gap-2 flex-wrap">
                     {activeTab === 'nation' && <Flag nation={r.name} className="w-5 h-3.5" />}
                     {r.name}
+                    {activeTab === 'individual' && r.name === chiefRef && (
+                      <span className="text-[8px] bg-fifa-green/15 text-fifa-green px-1.5 py-0.5 rounded uppercase tracking-widest">Chief VAR</span>
+                    )}
+                    {activeTab === 'individual' && r.name === bestTactician && (
+                      <span className="text-[8px] bg-fifa-blue/15 text-fifa-blue px-1.5 py-0.5 rounded uppercase tracking-widest">Best Tactician</span>
+                    )}
                   </td>
                   <td className="p-4 text-right font-bold">{r.score.toLocaleString()}</td>
                 </tr>

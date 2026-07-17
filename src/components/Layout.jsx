@@ -28,7 +28,7 @@ export default function Layout({ children, activeTab, setActiveTab, profile, han
           </h1>
           <div className="flex items-center gap-1.5 mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-fifa-lime animate-pulse" />
-            <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold">Live · Day 1 of 6</span>
+            <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold">Live · Day 4 of 6</span>
           </div>
           <nav className="space-y-1.5">
             {navItems.map((item) => {

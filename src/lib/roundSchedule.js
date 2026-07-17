@@ -2,7 +2,7 @@ export const ROUND_UNLOCK = {
   1: { unlock: '2026-07-14T18:00:00+05:30', close: '2026-07-15T20:00:00+05:30', title: 'Kickoff Trivia' },
   2: { unlock: '2026-07-15T09:00:00+05:30', close: '2026-07-16T20:00:00+05:30', title: 'Puzzle Break' },
   3: { unlock: '2026-07-16T08:00:00+05:30', close: null, title: 'Transfer Market' },
-  4: { unlock: '2026-07-17T09:00:00+05:30', close: null, title: 'VAR Check' },
+  4: { unlock: '2026-07-17T08:00:00+05:30', close: null, title: 'VAR Check' },
   5: { unlock: '2026-07-18T09:00:00+05:30', close: null, title: 'Memes & Moments' },
   6: { unlock: '2026-07-19T09:00:00+05:30', close: null, title: 'Final Whistle' },
 };
