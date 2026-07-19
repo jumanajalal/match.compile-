@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Flag from '../components/Flag';
 
-const MATCH = { round: '3rd_place_prediction', teamA: 'England', teamB: 'France' };
+const MATCH = { round: 'final_prediction', teamA: 'Argentina', teamB: 'Spain' };
 
 // Add a new entry here every time a match wraps — this drives the "Past Matches" section below.
 // Add the previous match here so it appears in the "Past Matches" section
@@ -23,6 +23,7 @@ const PAST_MATCHES = [
     actualScoreA: 1,
     actualScoreB: 2,
   },
+  { round: '3rd_place_prediction', date: 'July 18', teamA: 'England', teamB: 'France', actualScoreA: 6, actualScoreB: 4 },
 ];
 
 const medal = { 1: '🥇', 2: '🥈', 3: '🥉' };

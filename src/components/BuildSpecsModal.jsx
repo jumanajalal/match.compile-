@@ -13,20 +13,28 @@ export default function BuildSpecsModal({ onClose }) {
         </h2>
         <div className="space-y-5 text-sm text-gray-400">
           <div>
-            <h3 className="text-white font-bold text-xs uppercase tracking-widest mb-2">What to build</h3>
-            <p>Either a match-outcome predictor (basic ML/stats model) or a live scoreboard / stats dashboard app. Solo or squad — squad recommended.</p>
+            <h3 className="text-white font-bold text-xs uppercase tracking-widest mb-2">The task</h3>
+            <p>Build a simple system that predicts who wins tonight's Final — Argentina vs Spain. That's it. Doesn't need to be fancy.</p>
           </div>
           <div>
-            <h3 className="text-white font-bold text-xs uppercase tracking-widest mb-2">No-code path</h3>
-            <p>Can't code? Submit a manually reasoned prediction with a logic flowchart instead. Scored, just weighted lower than a coded solution.</p>
+            <h3 className="text-white font-bold text-xs uppercase tracking-widest mb-2">Don't know how to code this? Vibe-code it.</h3>
+            <p className="mb-2">Open Claude (or any AI assistant) and just ask for help directly. Something like:</p>
+            <div className="bg-black/40 border border-gray-800 rounded-lg p-3 text-xs text-gray-300 italic">
+              "Help me build a simple ML prediction system to predict who wins the World Cup Final between Argentina and Spain, using their past match results and stats."
+            </div>
+            <p className="mt-2">You don't need to understand every line — describe what you want, iterate on the output, and submit what you end up with.</p>
           </div>
           <div>
-            <h3 className="text-white font-bold text-xs uppercase tracking-widest mb-2">Timeline</h3>
-            <p>Open now (Day 1) through the Final (Day 6). Submit anytime before the deadline — earlier is safer.</p>
+            <h3 className="text-white font-bold text-xs uppercase tracking-widest mb-2">Still stuck? No-code path is completely fine.</h3>
+            <p>Can't get code working at all? Just write up your reasoning — why you think Argentina or Spain wins, based on form, key players, past results, whatever logic you want to use. Take a photo or screenshot of your write-up and submit that image. This is scored too, just weighted a bit lower than a working coded solution.</p>
+          </div>
+          <div>
+            <h3 className="text-white font-bold text-xs uppercase tracking-widest mb-2">Deadline</h3>
+            <p>Submit before tonight's Final kicks off — no extensions after that.</p>
           </div>
           <div>
             <h3 className="text-white font-bold text-xs uppercase tracking-widest mb-2">How to submit</h3>
-            <p>GitHub repo link or a shared doc/flowchart link. Submission form goes live here once judging criteria are finalized — check back.</p>
+            <p>GitHub repo link, a shared doc, or a photo of your written prediction — whatever fits what you built. Submission form/link goes here — check back or ask an organizer if it's not live yet.</p>
           </div>
         </div>
       </div>

@@ -15,8 +15,9 @@ import BuildSpecsModal from './components/BuildSpecsModal';
 import TransferMarket from './pages/TransferMarket';
 import VARRound from './pages/VARRound';
 import MomentsRound from './pages/MomentsRound';
+import FinalWhistleRound from './pages/FinalWhistleRound';
 
-const ROUND_NAME_MAP = { 1: 'kickoff_trivia', 2: 'puzzle_break', 3: 'transfer_market',  4: 'var_check', 5: 'moments_quiz' };
+const ROUND_NAME_MAP = { 1: 'kickoff_trivia', 2: 'puzzle_break', 3: 'transfer_market',  4: 'var_check', 5: 'moments_quiz' , 6: 'final_whistle' };
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -56,6 +57,7 @@ export default function App() {
     if (day === 3) setActiveTab('transfer_market');
     if (day === 4) setActiveTab('var');
     if (day === 5) setActiveTab('moments');
+    if (day === 6) setActiveTab('final');
     // add more mappings here as Rounds 3-6 go live
   };
 
@@ -121,6 +123,15 @@ export default function App() {
       <p className="text-gray-400 text-sm">Memes & Moments unlocks at {unlockTimeLabel(5)} today.</p>
     </div>
     )
+)}
+{activeTab === 'final' && (
+  isRoundUnlocked(6) ? (
+    <FinalWhistleRound profile={profile} onComplete={refreshCompletedRounds} onOpenBuildSpecs={() => setShowBuildSpecs(true)} />
+  ) : ( <div className="max-w-2xl mx-auto text-center py-20">
+      <div className="text-5xl mb-4">🔒</div>
+      <h2 className="font-display font-black text-2xl uppercase text-white mb-2">Not Yet</h2>
+      <p className="text-gray-400 text-sm">Final Round unlocks at {unlockTimeLabel(5)} today.</p>
+    </div> )
 )}
 
         {activeTab === 'predictions' && <Predictions profile={profile} />}
