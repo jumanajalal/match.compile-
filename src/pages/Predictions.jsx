@@ -159,10 +159,10 @@ export default function Predictions({ profile }) {
   return (
     <div className="max-w-2xl mx-auto">
 <p className="text-[10px] font-bold tracking-[0.3em] text-fifa-purple uppercase mb-2">
-  Third Place Playoff // Prediction
+  Final Round // Prediction
 </p>
 <h1 className="font-display font-black text-3xl uppercase tracking-wide text-white mb-8">
-  3rd Place Match Call
+  Final Match Call
 </h1>
 
       <div className="bg-gradient-to-br from-[#0d0d10] to-[#08080a] border border-fifa-purple/20 rounded-2xl p-8 mb-8 relative overflow-hidden">
